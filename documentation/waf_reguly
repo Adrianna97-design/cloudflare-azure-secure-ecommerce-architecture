@@ -1,0 +1,61 @@
+# Konfiguracja WAF i reguł bezpieczeństwa Cloudflare
+
+W konfiguracji WAF w Cloudflare stosuję podejście podobne do Azure:
+
+1. **Warstwa zarządzana (Managed Rules)**
+2. **Reguły niestandardowe (Custom Rules)**
+3. **Wykluczenia minimalizujące false positives**
+
+## Managed Rules
+
+Włączam w trybie blokującym:
+
+- SQL Injection
+- Cross-Site Scripting (XSS)
+- Command Injection
+- File Inclusion
+
+## Niestandardowe reguły SQLi
+
+Inspekcja:
+
+- parametrów zapytań,
+- ciała żądania,
+- nagłówków.
+
+Wzorce:
+
+- `union select`
+- `sleep(`
+- `benchmark(`
+- `information_schema`
+
+Początkowo stosuję **Managed Challenge**, dopiero po analizie logów przełączam na blokowanie.
+
+## Niestandardowe reguły XSS
+
+Wykrywam:
+
+- `<script`
+- `javascript:`
+- `onerror=`
+
+## Ochrona przed atakami L7
+
+Stosuję **Rate Limiting Rules** na:
+
+- `/login`
+- `/checkout`
+- `/api/*`
+
+Z wyjątkami dla integracji (np. bramki płatności).
+
+## Bot Management
+
+Wykorzystuję:
+
+- Super Bot Fight Mode
+- Bot Management Enterprise
+
+Ruch o niskim score → Managed Challenge  
+Ewidentne boty → blokada
