@@ -1,0 +1,38 @@
+# Architektura Cloudflare → Azure → HAProxy → IIS → MySQL
+
+Ruch w tej architekturze przebiega w pełni przez Cloudflare, ale całość została zaprojektowana tak, aby to Azure było głównym i świadomym centrum kontroli. Użytkownik końcowy zawsze trafia najpierw na Cloudflare, gdzie jego żądanie jest filtrowane przez:
+
+- Cloudflare WAF,
+- mechanizmy anty-DDoS,
+- Bot Management.
+
+Dopiero po pozytywnej weryfikacji ruch jest kierowany dalej — Cloudflare nawiązuje połączenie HTTPS z infrastrukturą w Azure, korzystając z:
+
+- **Authenticated Origin Pull**, lub
+- **mTLS**.
+
+Dzięki temu każde żądanie pochodzi wyłącznie z zaufanego źródła.
+
+## Warstwa Azure
+
+Po stronie Azure ruch trafia do publicznego IP w warstwie DMZ, gdzie znajduje się:
+
+- Azure Firewall **lub**
+- HAProxy w dedykowanym subnetcie.
+
+NSG i Azure Firewall dopuszczają wyłącznie zakresy IP Cloudflare — cała reszta ruchu jest odrzucana. Dzięki temu nikt nie może ominąć Cloudflare i połączyć się z HAProxy bezpośrednio.
+
+## Warstwa aplikacyjna
+
+- HAProxy → serwery IIS (App Subnet)
+- IIS → MySQL (Data Subnet)
+- Całość działa w prywatnej przestrzeni adresowej Azure.
+
+## Efekt
+
+Komunikacja jest kontrolowana na dwóch poziomach:
+
+1. Cloudflare filtruje ruch na brzegu.
+2. Azure egzekwuje zasady dostępu wewnątrz chmury.
+
+Żadne żądanie nie ominie WAF ani nie trafi do infrastruktury bez weryfikacji.
