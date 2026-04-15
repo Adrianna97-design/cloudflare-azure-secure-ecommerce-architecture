@@ -1,0 +1,35 @@
+# Optymalizacja wydajności w Cloudflare
+
+W optymalizacji wydajności stosuję podejście znane z Azure CDN i Front Door.
+
+## Statyczne zasoby
+
+- obrazy,
+- CSS,
+- JS,
+
+→ długie TTL + wersjonowanie plików.
+
+## Strony pół-dynamiczne
+
+- listingi produktów,
+- kategorie,
+
+→ krótkie TTL (np. 30–120 sekund).
+
+## Strony dynamiczne
+
+- koszyk,
+- checkout,
+- panel klienta,
+
+→ **wyłączone z cache** dzięki regułom opartym na cookie.
+
+## Dodatkowe optymalizacje
+
+- Early Hints (103)
+- HTTP/3
+- automatyczna optymalizacja obrazów
+- kompresja Brotli
+
+Efekt: statyczne elementy są maksymalnie przyspieszone, pół-dynamiczne odciążają backend, a dynamiczne pozostają aktualne.
